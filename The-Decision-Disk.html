@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Decision Disk</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      background: linear-gradient(135deg, #c2e9fb, #a1c4fd);
+      min-height: 100vh;
+      margin: 0;
+    }
+    h1 {
+      font-size: 2.5em;
+      margin-bottom: 5px;
+      animation: fadeInDown 1s ease-in-out;
+    }
+    #tagline {
+      font-size: 1.1em;
+      margin-bottom: 20px;
+      font-style: italic;
+      animation: fadeInUp 1s ease-in-out;
+    }
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    #inputArea {
+      margin-bottom: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+    }
+    input[type="text"] {
+      padding: 10px;
+      width: 200px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      padding: 10px 20px;
+      border: none;
+      background-color: #007BFF;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #wheelContainer {
+      position: relative;
+      width: 300px;
+      height: 300px;
+      margin-bottom: 20px;
+    }
+    #wheel {
+      border-radius: 50%;
+      border: 8px solid #333;
+      transition: transform 4s cubic-bezier(0.33, 1, 0.68, 1);
+    }
+    #centerButton {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80px;
+      height: 80px;
+      background-color: black;
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: bold;
+      cursor: pointer;
+      z-index: 5;
+      transition: transform 0.2s ease-in-out;
+    }
+    #centerButton:hover {
+      transform: translate(-50%, -50%) scale(1.05);
+    }
+    #result {
+      font-size: 24px;
+      font-weight: bold;
+      margin-top: 20px;
+      color: green;
+      opacity: 0;
+      animation: popIn 0.5s ease-in-out forwards;
+    }
+    @keyframes popIn {
+      0% { transform: scale(0.5); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    @media (max-width: 500px) {
+      #wheelContainer {
+        width: 90vw;
+        height: 90vw;
+      }
+      #wheel {
+        width: 100%;
+        height: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>The Decision Disk</h1>
+  <div id="tagline"></div>
+
+  <div id="inputArea">
+    <input type="text" id="itemInput" placeholder="Enter item" />
+    <button onclick="addItem()">Add</button>
+    <button onclick="resetItems()">Reset</button>
+  </div>
+
+  <div id="wheelContainer">
+    <canvas id="wheel" width="300" height="300"></canvas>
+    <div id="centerButton" onclick="spin()">SPIN</div>
+  </div>
+  <div id="result"></div>
+
+  <script>
+    const items = [];
+    const colors = ["#f4a261", "#2a9d8f", "#e76f51", "#264653", "#e9c46a", "#8ab17d"];
+    let angle = 0;
+    let spinning = false;
+
+    const taglines = [
+      "When choices confuse, we spin to choose.",
+      "Struggling to decide? Let the disk decide.",
+      "Your fun little friend for tough decisions.",
+      "Can’t choose? Give it a spin!",
+      "Because every decision deserves a little spin.",
+      "One spin away from clarity.",
+      "We help you make the tough calls!",
+      "Decisions made easy."
+    ];
+
+    document.getElementById("tagline").innerText = taglines[Math.floor(Math.random() * taglines.length)];
+
+    function addItem() {
+      const input = document.getElementById("itemInput");
+      const value = input.value.trim();
+      if (value) {
+        items.push(value);
+        input.value = "";
+        drawWheel();
+      }
+    }
+
+    function resetItems() {
+      items.length = 0;
+      angle = 0;
+      document.getElementById("wheel").style.transform = "rotate(0deg)";
+      document.getElementById("result").innerText = "";
+      document.getElementById("result").style.opacity = 0;
+      drawWheel();
+    }
+
+    function drawWheel() {
+      const canvas = document.getElementById("wheel");
+      const ctx = canvas.getContext("2d");
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+      const radius = canvas.width / 2;
+      const sliceAngle = (2 * Math.PI) / items.length;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      items.forEach((item, i) => {
+        const startAngle = i * sliceAngle;
+        const endAngle = (i + 1) * sliceAngle;
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+        ctx.fillStyle = colors[i % colors.length];
+        ctx.fill();
+        ctx.save();
+        ctx.translate(centerX, centerY);
+        ctx.rotate(startAngle + sliceAngle / 2);
+        ctx.textAlign = "right";
+        ctx.fillStyle = "#fff";
+        ctx.font = "bold 16px Poppins";
+        ctx.fillText(item, radius - 10, 10);
+        ctx.restore();
+      });
+    }
+
+    function spin() {
+      if (spinning || items.length === 0) return;
+      spinning = true;
+      const canvas = document.getElementById("wheel");
+      const finalAngle = Math.random() * 360 + 1440;
+      angle += finalAngle;
+      canvas.style.transform = `rotate(${angle}deg)`;
+
+      setTimeout(() => {
+        const degrees = angle % 360;
+        const index = items.length - Math.floor((degrees / 360) * items.length) - 1;
+        const selected = items[(index + items.length) % items.length];
+        const resultDiv = document.getElementById("result");
+        resultDiv.innerText = `Result: ${selected}`;
+        resultDiv.style.opacity = 1;
+        resultDiv.style.animation = "popIn 0.5s ease-in-out";
+        spinning = false;
+      }, 4000);
+    }
+  </script>
+</body>
+</html>
