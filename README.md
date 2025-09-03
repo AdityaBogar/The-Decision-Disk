@@ -23,7 +23,8 @@ A fun, interactive web app that helps users make decisions by spinning a customi
 ---
 
 ## Demo
-You can check out a live version here. 
+You can check out a live version here.
+https://adityabogar.github.io/The-Decision-Disk/
 
 ---
 
